@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { useCode } from "../context";
-import { useFileManager } from "@/util/responseParser";
 
 // Dynamically import Monaco Editor to avoid SSR issues
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -42,11 +41,11 @@ export function CodeTab() {
 						<div
 							key={type}
 							className={`text-sm p-2 hover:bg-muted-foreground rounded cursor-pointer ${
-								activeFile === type ? "bg-muted-foreground" : ""
+								activeFile === type ? "bg-blue-950/50" : ""
 							}`}
 							onClick={() => setActiveFile(type as FileType)}
 						>
-							{config.icon} {config.name}
+							 {config.name}
 						</div>
 					))}
 				</div>

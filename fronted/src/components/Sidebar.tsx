@@ -4,19 +4,13 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import ChatBox from "@/components/ChatBox";
 import { TextStreamChatTransport } from "ai";
-import {
-	getMessageTextContent,
-	parseLLMResponse,
-	useFileManager,
-} from "@/util/responseParser";
-import { marked } from "marked";
+import { processMessageToFiles } from "@/util/responseParser";
+import { ArrowLeft } from "lucide-react";
 import { useCode } from "@/context/CodeContext";
+import { MemoizedMarkdown } from "./MemoizedMarkdown";
+import Link from "next/link";
 
-interface SidebarProps {
-	children?: React.ReactNode;
-}
-
-export function Sidebar({ children }: SidebarProps) {
+export function Sidebar() {
 	const [input, setInput] = useState("Create a red box");
 
 	const { messages, sendMessage, status } = useChat({
@@ -25,13 +19,7 @@ export function Sidebar({ children }: SidebarProps) {
 		}),
 	});
 
-	const { setCode: setCodeContext } = useCode();
-
-	// Use useRef to store the context setter to prevent hook recreation
-	const contextSetterRef = useRef(setCodeContext);
-	contextSetterRef.current = setCodeContext; // Update ref when setCodeContext changes
-
-	const {  updateFiles } = useFileManager();
+	const { code, setCode: setCodeContext } = useCode();
 
 	// Process latest assistant message
 	useEffect(() => {
@@ -39,26 +27,22 @@ export function Sidebar({ children }: SidebarProps) {
 
 		// Only process when streaming is complete (status is 'ready') and we have a message
 		if (latestMessage?.parts && status === "ready") {
-			const textContent = getMessageTextContent(latestMessage);
-			console.log("Text content:", textContent); // Debug log
-			const parsed = parseLLMResponse(textContent);
-			console.log("Parsed response:", parsed); // Debug log
-			if (parsed.diffs.length > 0) {
-				console.log("Streaming complete, updating files");
-				
-				const updated = updateFiles(parsed);
-				const newCode = {
-					html: updated["index.html"] || "",
-					css: updated["styles.css"] || "",
-					js: updated["script.js"] || "",
-				};
-				setCodeContext(newCode);
-			}
+			const updatedFiles = processMessageToFiles(latestMessage, {
+				"index.html": code.html,
+				"styles.css": code.css,
+				"script.js": code.js,
+			});
+
+			const newCode = {
+				html: updatedFiles["index.html"],
+				css: updatedFiles["styles.css"],
+				js: updatedFiles["script.js"],
+			};
+			setCodeContext(newCode);
 		}
 	}, [messages, status]);
 
 	const submitMessage = () => {
-		console.log(input + " df");
 		if (input.trim()) {
 			sendMessage({ text: input });
 			setInput("");
@@ -69,32 +53,36 @@ export function Sidebar({ children }: SidebarProps) {
 		<div className="w-1/4 min-w-[400px] h-full bg-background border-r shrink-0 flex flex-col relative p-4">
 			{/* Top section for project files and tools */}
 			<div className="flex-1 p-4 overflow-auto">
-				<div className="space-y-4">
+				<div className="space-y-4 ">
 					<div className="text-sm text-muted-foreground">
-						Project files and tools will appear here
+						<Link href="/">
+							<ArrowLeft />
+						</Link>
 					</div>
-					{messages?.map((message) => (
-						<div key={message.id}>
-							{message.role === "user" ? "User: " : "AI: "}
-							{/* {renderMessageContent(message)} */}
+					<div className="flex flex-col w-full">
+						{messages?.map((message) => (
+							<div
+								key={message.id}
+								className={`${
+									message.role === "user"
+										? "bg-muted-foreground rounded-md p-2 self-end "
+										: ""
+								} space-y-4 `}
+							>
+								{message.role === "assistant" ? "Builder AI:- " : null}
 
-							{message.parts.map((part, index) =>
-								part?.type === "text" ? (
-									<span
-										key={index}
-										dangerouslySetInnerHTML={{
-											__html:
-												message.role === "user"
-													? `<span style="color: #2563eb; font-weight: bold;">User:</span> ${marked.parse(
-															part.text
-													  )}`
-													: marked.parse(part.text),
-										}}
-									/>
-								) : null
-							)}
-						</div>
-					))}
+								{message.parts.map((part, index) =>
+									part?.type === "text" ? (
+										<MemoizedMarkdown
+											key={`${message.id}-text`}
+											id={message.id}
+											content={part.text}
+										/>
+									) : null
+								)}
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
 
