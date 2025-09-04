@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { useCode } from "../context";
+import { useCode } from "../context/CodeContext";
 
 // Dynamically import Monaco Editor to avoid SSR issues
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -26,7 +26,6 @@ const fileConfig: {
 
 export function CodeTab() {
 	const { code } = useCode();
-
 	const [activeFile, setActiveFile] = useState<FileType>("html");
 	const currentContent = code[activeFile];
 	const currentConfig = fileConfig[activeFile];
@@ -45,7 +44,7 @@ export function CodeTab() {
 							}`}
 							onClick={() => setActiveFile(type as FileType)}
 						>
-							 {config.name}
+							{config.icon} {config.name}
 						</div>
 					))}
 				</div>
@@ -55,9 +54,7 @@ export function CodeTab() {
 			<div className="flex-1 flex flex-col">
 				<div className="bg-muted-foreground p-2 border-b flex items-center justify-between">
 					<span className="text-sm font-medium">{currentConfig.name}</span>
-					<div className="text-xs ">
-						{currentConfig.language.toUpperCase()}
-					</div>
+					<div className="text-xs ">{currentConfig.language.toUpperCase()}</div>
 				</div>
 
 				<MonacoEditor

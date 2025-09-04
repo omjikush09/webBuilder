@@ -13,7 +13,7 @@ export default function Home() {
 	const [projectState, setProjectState] = useState<{
 		data: string;
 		isLoading: boolean;
-		error: String;
+		error: string;
 	}>({ isLoading: false, error: "", data: "" });
 
 	const createProject = async () => {

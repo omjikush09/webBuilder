@@ -1,5 +1,4 @@
 import { UIMessage } from "@ai-sdk/react";
-import { useState, useCallback } from "react";
 import { marked } from "marked";
 import { parsePatch, applyPatch } from "diff";
 
@@ -101,10 +100,6 @@ export function applyDiffToFile(
 		const lines = diffContent.split("\n");
 		const diffHeaderIndex = lines.findIndex((line) => line.startsWith("@@"));
 
-		if (diffHeaderIndex === -1) {
-			return currentContent;
-		}
-
 		// Extract the diff header
 		const diffHeader = lines[diffHeaderIndex];
 
@@ -196,7 +191,6 @@ export function processMessageToFiles(
 
 	parsedResponse.diffs.forEach((diff) => {
 		const filename = diff.filename;
-
 		const oldContent = updatedFiles[filename];
 		const newContent = applyDiffToFile(oldContent, diff.diffContent);
 		updatedFiles[filename] = newContent;

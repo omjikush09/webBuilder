@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useCode } from "../context";
+import { useCode } from "../context/CodeContext";
 
 export default function PreviewTab() {
 	const { code } = useCode();

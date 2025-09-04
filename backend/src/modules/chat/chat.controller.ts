@@ -12,27 +12,6 @@ export const generateTextController = async (req: Request, res: Response) => {
 
 		// Get the streaming response from Vercel AI SDK
 		const response = await generateTextService(messages, res);
-
-		// Check if response is valid
-		// if (!response.ok) {
-		// 	return res.status(500).json({ error: "AI service error" });
-		// }
-
-		// // Copy all headers from the AI SDK response
-		// response.headers.forEach((value, key) => {
-		// 	res.setHeader(key, value);
-		// });
-
-		// // Set CORS headers
-		// res.setHeader("Access-Control-Allow-Origin", "*");
-		// res.setHeader("Access-Control-Allow-Headers", "Cache-Control");
-
-		// Pipe the response directly
-		// for await (let chunk of response){
-		//     res.write(chunk);
-		// }
-		// console.log("Response ended");
-		// res.end();
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ error: "Failed to generate text." });

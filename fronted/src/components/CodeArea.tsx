@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CodeTab } from "@/components/CodeTab";
 import PreviewTab from "@/components/PreviewTab";
 
-export function MainContent() {
+export function CodeArea() {
 	return (
 		<div className="flex-1  rounded-lg bg-background  h-full">
 			<Tabs defaultValue="code" className="w-full h-full">

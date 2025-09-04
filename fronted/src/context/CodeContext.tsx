@@ -25,11 +25,14 @@ const CodeContext = createContext<CodeContextType | undefined>(undefined);
 
 interface CodeProviderProps {
 	children: ReactNode;
+	initialCode: CodeContent;
 }
 
-export const CodeProvider: React.FC<CodeProviderProps> = ({ children }) => {
-	const [code, setCodeState] = useState<CodeContent>(defaultCode);
-
+export const CodeProvider: React.FC<CodeProviderProps> = ({
+	children,
+	initialCode,
+}) => {
+	const [code, setCodeState] = useState<CodeContent>(initialCode);
 	const setCode = (newCode: Partial<CodeContent>) => {
 		setCodeState((prev) => ({
 			...prev,
