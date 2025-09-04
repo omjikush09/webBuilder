@@ -10,7 +10,7 @@ import { useCode } from "@/context/CodeContext";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import Link from "next/link";
 import api from "@/util/axios";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { saveMessageToDatabase } from "@/lib/api/message";
 
 export function Sidebar({
@@ -21,6 +21,7 @@ export function Sidebar({
 	const { id } = useParams<{ id: string }>();
 	const [input, setInput] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const isFirstRender = useRef(true);
 	const { code, setCode: setCodeContext } = useCode();
 
 	const { messages, sendMessage, status, error, regenerate } = useChat({
@@ -61,13 +62,9 @@ export function Sidebar({
 
 		//To skip initial messages
 		const initialMessagesLength = initialMessages.length;
+		if (messages.length <= initialMessagesLength) return;
 		// Only process when streaming is complete (status is 'ready') and we have a message
-		if (
-			latestMessage?.parts &&
-			status === "ready" &&
-			!error &&
-			messages.length > initialMessagesLength
-		) {
+		if (latestMessage?.parts && status === "ready" && !error) {
 			const updatedFiles = processMessageToFiles(latestMessage, {
 				"index.html": code.html,
 				"styles.css": code.css,
@@ -93,11 +90,12 @@ export function Sidebar({
 	}, [messages, status]);
 
 	useEffect(() => {
-		// When new proeject starts
-		if (messages.length === 1 && status === "ready") {
+		// When new project starts - only run once on mount
+		if (isFirstRender.current && messages.length === 1 && status === "ready") {
+			isFirstRender.current = false;
 			regenerate({ messageId: messages[0].id });
 		}
-	}, []);
+	}, [messages[0]?.id, status]);
 
 	const submitMessage = () => {
 		if (input.trim()) {
@@ -153,6 +151,11 @@ export function Sidebar({
 							</div>
 						))}
 					</div>
+					{status === "submitted" && (
+						<div className="text-sm text-muted-foreground">
+							<p>Builder AI is thinking...</p>
+						</div>
+					)}
 					{/* Invisible element to scroll to */}
 					<div ref={messagesEndRef} />
 				</div>
