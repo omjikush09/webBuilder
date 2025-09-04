@@ -2,14 +2,16 @@
 
 import ChatBox from "@/components/ChatBox";
 import api from "@/util/axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { saveMessageToDatabase } from "@/lib/api/message";
 
 export default function Home() {
 	const router = useRouter();
 
 	const [message, setMessage] = useState("");
+	const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
 	const [projectState, setProjectState] = useState<{
 		data: string;
 		isLoading: boolean;
@@ -24,8 +26,19 @@ export default function Home() {
 				{ data: { data: { id: string } } }
 			>("/project", {
 				name: message,
+				html: "",
+				css: "",
+				js: "",
 			});
 			const id = response.data.data.id;
+			await saveMessageToDatabase({
+				messages: {
+					id: "",
+					role: "user",
+					parts: [{ type: "text", text: message }],
+				},
+				projectId: id,
+			});
 			router.push(`/project/${id}`);
 		} catch (error) {
 			toast.error("Something Went wrong");
@@ -35,9 +48,20 @@ export default function Home() {
 		}
 	};
 
+	const getProjects = async () => {
+		const response = await api.get<{
+			data: { id: string; name: string }[];
+		}>("/project");
+
+		setProjects(response.data.data);
+	};
+	useEffect(() => {
+		getProjects();
+	}, []);
+
 	return (
-		<main className="  w-full  px-4  grid place-items-center  bg-zinc-500   h-screen text-stone-300">
-			<div className="mx-auto flex w-full flex-col items-center gap-7 max-md:pt-4 max-w-2xl">
+		<main className="w-screen min-h-screen    px-4  grid place-items-center  bg-zinc-500    text-stone-300">
+			<div className="mx-auto flex  w-full flex-col items-center gap-7 max-md:pt-4 max-w-2xl">
 				{/* Welcome message */}
 
 				<div
@@ -54,6 +78,18 @@ export default function Home() {
 					textAreaValue={message}
 					setTextAreaValue={setMessage}
 				/>
+				<h1 className="text-2xl font-bold">Projects</h1>
+				<div className="flex  gap-2 overflow-x-auto w-full flex-wrap">
+					{projects.map((project) => (
+						<div
+							className="flex items-center justify-center bg-neutral-700 gap-7 rounded-md p-4 cursor-pointer    text-center truncate"
+							key={project.id}
+							onClick={() => router.push(`/project/${project.id}`)}
+						>
+							{project.name}
+						</div>
+					))}
+				</div>
 			</div>
 		</main>
 	);

@@ -10,7 +10,8 @@ import { useCode } from "@/context/CodeContext";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import Link from "next/link";
 import api from "@/util/axios";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { saveMessageToDatabase } from "@/lib/api/message";
 
 export function Sidebar({
 	initialMessages = [],
@@ -18,11 +19,11 @@ export function Sidebar({
 	initialMessages: UIMessage[];
 }) {
 	const { id } = useParams<{ id: string }>();
-	const [input, setInput] = useState("Create a red box");
+	const [input, setInput] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const { code, setCode: setCodeContext } = useCode();
 
-	const { messages, sendMessage, status, error } = useChat({
+	const { messages, sendMessage, status, error, regenerate } = useChat({
 		messages: initialMessages,
 		transport: new TextStreamChatTransport({
 			api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
@@ -30,23 +31,6 @@ export function Sidebar({
 	});
 
 	//Save message to database
-	const saveMessageToDatabase = async ({
-		messages,
-	}: {
-		messages: UIMessage;
-	}) => {
-		try {
-			const response = await api.post(
-				`${process.env.NEXT_PUBLIC_API_URL}/message`,
-				{
-					...messages,
-					projectId: id,
-				}
-			);
-		} catch (error) {
-			console.error(error);
-		}
-	};
 
 	const updateProject = async ({
 		html,
@@ -97,16 +81,23 @@ export function Sidebar({
 			};
 
 			setCodeContext(newCode);
-			saveMessageToDatabase({ messages: latestMessage });
+			saveMessageToDatabase({ messages: latestMessage, projectId: id });
 			updateProject(newCode);
 		}
 		if (status === "submitted" && !error) {
 			const lastUserMessage = messages.filter((m) => m.role === "user").pop();
 			if (lastUserMessage) {
-				saveMessageToDatabase({ messages: lastUserMessage });
+				saveMessageToDatabase({ messages: lastUserMessage, projectId: id });
 			}
 		}
 	}, [messages, status]);
+
+	useEffect(() => {
+		// When new proeject starts
+		if (messages.length === 1 && status === "ready") {
+			regenerate({ messageId: messages[0].id });
+		}
+	}, []);
 
 	const submitMessage = () => {
 		if (input.trim()) {
@@ -144,8 +135,8 @@ export function Sidebar({
 								key={message.id}
 								className={`${
 									message.role === "user"
-										? "bg-muted-foreground rounded-md p-2 self-end "
-										: ""
+										? "bg-muted-foreground rounded-md p-2 self-end mt-1 "
+										: "my-2"
 								} space-y-4 `}
 							>
 								{message.role === "assistant" ? "Builder AI:- " : null}
@@ -174,6 +165,7 @@ export function Sidebar({
 					textAreaValue={input}
 					setTextAreaValue={setInput}
 					submitButtonFunction={submitMessage}
+					placeholder={"Ask Builder AI"}
 				/>
 			</div>
 		</div>

@@ -27,8 +27,8 @@ function ChatBox({
 				value={textAreaValue}
 				onKeyDown={handleKeyPress}
 				onChange={(e) => setTextAreaValue(e.target.value)}
-				className="w-full h-full active:border-none focus:border-none focus-visible:outline-none"
-				placeholder={placeholder || "Ask me anything..."}
+				className="w-full h-full active:border-none focus:border-none focus-visible:outline-none resize-none"
+				placeholder={placeholder || "Ask me to build ..."}
 			/>
 			<div className="flex justify-end">
 				<Button

@@ -17,9 +17,9 @@ datasource db {
 model Project {
   id String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name String 
-  html Json    @db.Json @default("{}")
-  css Json  @db.Json @default("{}")  
-  js Json  @db.Json @default("{}")
+  html Json    @db.Json 
+  css Json  @db.Json 
+  js Json  @db.Json 
   messages Message[]
   createdAt DateTime @default(now())
 }
@@ -29,7 +29,7 @@ model Message {
   role Role
   parts Json  @db.Json
   projectId String  @db.Uuid
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 

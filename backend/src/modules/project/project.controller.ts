@@ -1,6 +1,16 @@
 import { Request, Response } from "express";
-import { createProjectService, getProjectService, updateProjectService } from "./project.service";
-import { CreateProjectInput, GetProjectInput, UpdateProjectInput } from "./project.schema";
+import {
+	createProjectService,
+	getProjectService,
+	getProjectsService,
+	updateProjectService,
+} from "./project.service";
+import {
+	CreateProjectInput,
+	GetProjectInput,
+	GetProjectsInput,
+	UpdateProjectInput,
+} from "./project.schema";
 
 export const createProjectController = async (
 	req: Request<unknown, unknown, CreateProjectInput["body"]>,
@@ -44,7 +54,11 @@ export const getProjectController = async (
 };
 
 export const updateProjectController = async (
-	req: Request<UpdateProjectInput["params"], unknown, UpdateProjectInput["body"]>,
+	req: Request<
+		UpdateProjectInput["params"],
+		unknown,
+		UpdateProjectInput["body"]
+	>,
 	res: Response
 ) => {
 	try {
@@ -59,6 +73,29 @@ export const updateProjectController = async (
 		res.status(500).json({
 			success: false,
 			error: "Failed to update project",
+		});
+	}
+};
+
+export const getProjectsController = async (
+	req: Request<unknown, GetProjectsInput["query"], unknown>,
+	res: Response
+) => {
+	try {
+		const projects = await getProjectsService({
+			page: Number(req.query.page) || 1,
+			limit: Number(req.query.limit) || 10,
+		});
+		res.status(200).json({
+			success: true,
+			message: "Projects fetched successfully",
+			...projects,
+		});
+	} catch (error) {
+		console.error("Get projects error:", error);
+		res.status(500).json({
+			success: false,
+			error: "Failed to get projects",
 		});
 	}
 };

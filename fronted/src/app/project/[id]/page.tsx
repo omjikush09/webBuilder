@@ -1,11 +1,16 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { CodeArea } from "@/components/CodeArea";
+import { Loading } from "@/components/Loading";
+import { Error } from "@/components/Error";
 import api from "@/util/axios";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { UIMessage } from "@ai-sdk/react";
 import { CodeProvider } from "@/context/CodeContext";
-type ProjectReponse = {
+
+type ProjectResponse = {
 	data: {
 		id: string;
 		name: string;
@@ -15,30 +20,69 @@ type ProjectReponse = {
 	};
 };
 
-async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
-	const { id } = await params;
-	const project = await api.get<ProjectReponse>(`/project/${id}`);
-	const projectMessges = await api.get<UIMessage[]>(`/message/`, {
-		params: {
-			projectId: id,
-		},
-	});
+function ChatPage() {
+	const { id } = useParams<{ id: string }>();
+	const [project, setProject] = useState<ProjectResponse | null>(null);
+	const [projectMessages, setProjectMessages] = useState<UIMessage[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	if (projectMessges.status !== 200) {
-		return notFound();
+	const fetchData = async () => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			// Fetch project data
+			const projectResponse = await api.get<ProjectResponse>(`/project/${id}`);
+			setProject(projectResponse.data);
+
+			// Fetch project messages
+			const messagesResponse = await api.get<UIMessage[]>(`/message/`, {
+				params: { projectId: id },
+			});
+
+			if (messagesResponse.status === 200) {
+				setProjectMessages(messagesResponse.data);
+			}
+		} catch (err) {
+			console.error("Failed to fetch project data:", err);
+			setError("Failed to load project");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchData();
+	}, [id]);
+
+	if (loading) {
+		return (
+			<div className="h-screen bg-background">
+				<Loading text="Loading project..." size="lg" />
+			</div>
+		);
+	}
+
+	if (error || !project) {
+		return (
+			<div className="h-screen bg-background">
+				<Error message={error || "Project not found"} onRetry={fetchData} />
+			</div>
+		);
 	}
 
 	return (
 		<CodeProvider
 			initialCode={{
-				html: project.data.data.html,
-				css: project.data.data.css,
-				js: project.data.data.js,
+				html: project.data.html,
+				css: project.data.css,
+				js: project.data.js,
 			}}
 		>
 			<div className="h-screen flex bg-background gap-4 overflow-hidden">
 				{/* Left Sidebar with chat functionality */}
-				<Sidebar initialMessages={projectMessges.data} />
+				<Sidebar initialMessages={projectMessages} />
 
 				{/* Right Main Content Area */}
 				<div className="flex-1 flex p-2">

@@ -10,39 +10,38 @@ export default function PreviewTab() {
 	const getCombinedHTML = () => {
 		if (!code.html) return "";
 
-		// Create a complete HTML document with embedded CSS and JS
-		return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview</title>
-    <style>
-        ${code.css}
-    </style>
-</head>
-<body>
-    ${code.html
-			.replace(/<head>[\s\S]*?<\/head>/gi, "")
-			.replace(/<script[\s\S]*?<\/script>/gi, "")}
-    <script>
-        ${code.js}
-    </script>
-</body>
-</html>`;
+		// Insert CSS and JS into the existing HTML
+		let combinedHTML = code.html;
+
+		// Add CSS if it exists
+		if (code.css) {
+			combinedHTML = combinedHTML.replace(
+				/<\/head>/i,
+				`<style>${code.css}</style>\n</head>`
+			);
+		}
+
+		// Add JS if it exists
+		if (code.js) {
+			combinedHTML = combinedHTML.replace(
+				/<\/body>/i,
+				`<script>${code.js}</script>\n</body>`
+			);
+		}
+
+		return combinedHTML;
 	};
 
 	const combinedHTML = getCombinedHTML();
 
 	return (
-		<div className="w-full h-full border  bg-white rounded">
+		<div className="w-full h-full border bg-white rounded">
 			{combinedHTML ? (
 				<iframe
 					srcDoc={combinedHTML}
 					className="w-full h-full border-0"
 					title="Preview"
-					sandbox="allow-scripts allow-same-origin"
+					sandbox="allow-scripts"
 				/>
 			) : (
 				<div className="flex items-center justify-center h-full text-gray-500">
