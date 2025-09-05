@@ -10,11 +10,7 @@ import { useCode, useAutoScroll } from "@/hooks";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-	getChatEndpoint,
-	saveMessageToDatabase,
-	updateProject,
-} from "@/lib/api";
+import { getChatEndpoint, saveMessageTodb, updateProject } from "@/lib/api";
 import { toast } from "sonner";
 
 export function Sidebar({
@@ -38,29 +34,26 @@ export function Sidebar({
 	});
 
 	//Save message to database
-
-	const updateProjectData = async ({
-		html,
-		css,
-		js,
-	}: {
-		html: string;
-		css: string;
-		js: string;
-	}) => {
-		if (!id) return;
-
+	const saveMessageTodbAndUpdateProject = async (
+		messages: UIMessage,
+		{ html, css, js }: { html: string; css: string; js: string }
+	) => {
 		try {
-			await updateProject(id, {
-				html: html,
-				css: css,
-				js: js,
-			});
+			await Promise.all([
+				saveMessageTodb({ messages, projectId: id }),
+				updateProject(id, { html, css, js }),
+			]);
 		} catch (error) {
-			toast.error("Falied to save code. Something Went wrong Please try again");
+			toast.error("Failed to save state of project");
 		}
 	};
-
+	const saveMessage = async (messages: UIMessage, projectId: string) => {
+		try {
+			await saveMessageTodb({ messages, projectId });
+		} catch (error) {
+			toast.error("Failed to save message");
+		}
+	};
 	// Process latest assistant message
 	useEffect(() => {
 		if (status === "streaming") {
@@ -95,13 +88,12 @@ export function Sidebar({
 			};
 
 			setCodeContext(newCode);
-			saveMessageToDatabase({ messages: latestMessage, projectId: id });
-			updateProjectData(newCode);
+			saveMessageTodbAndUpdateProject(latestMessage, newCode);
 		}
 		if (status === "submitted" && !error) {
 			const lastUserMessage = messages.filter((m) => m.role === "user").pop();
 			if (lastUserMessage) {
-				saveMessageToDatabase({ messages: lastUserMessage, projectId: id });
+				saveMessage(lastUserMessage, id);
 			}
 		}
 	}, [messages, status]);

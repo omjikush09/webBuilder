@@ -4,7 +4,7 @@ import ChatBox from "@/components/ChatBox";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createProject, getProjects, saveMessageToDatabase } from "@/lib/api";
+import { createProject, getProjects, saveMessageTodb } from "@/lib/api";
 
 export default function Home() {
 	const router = useRouter();
@@ -12,10 +12,9 @@ export default function Home() {
 	const [message, setMessage] = useState("");
 	const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
 	const [projectState, setProjectState] = useState<{
-		data: string;
 		isLoading: boolean;
 		error: string;
-	}>({ isLoading: false, error: "", data: "" });
+	}>({ isLoading: false, error: "" });
 
 	const createNewProject = async () => {
 		setProjectState({ ...projectState, isLoading: true, error: "" });
@@ -27,7 +26,7 @@ export default function Home() {
 				js: "",
 			});
 			const id = response.data.id;
-			await saveMessageToDatabase({
+			await saveMessageTodb({
 				messages: {
 					id: "",
 					role: "user",
@@ -45,8 +44,12 @@ export default function Home() {
 	};
 
 	const fetchProjects = async () => {
-		const response = await getProjects();
-		setProjects(response.data);
+		try {
+			const response = await getProjects();
+			setProjects(response.data);
+		} catch (error) {
+			toast.error("Failed to get projects");
+		}
 	};
 	useEffect(() => {
 		fetchProjects();

@@ -153,12 +153,6 @@ export function applyDiffToFile(
 		}
 		return newContent;
 	} catch (error) {
-		console.warn("Diff failed:", error);
-
-		console.error(
-			"Failed to apply diff: " +
-				(error instanceof Error ? error.message : String(error))
-		);
 		return currentContent;
 	}
 }
