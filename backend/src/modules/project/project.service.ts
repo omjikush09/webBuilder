@@ -4,6 +4,7 @@ import {
 	UpdateProjectInput,
 } from "./project.schema";
 import { db } from "../../utils/database";
+import logger from "../../utils/logger";
 
 export const createProjectService = async (
 	data: CreateProjectInput["body"]
@@ -22,7 +23,7 @@ export const createProjectService = async (
 
 		return newProject;
 	} catch (error) {
-		console.error(error);
+		logger.error("Failed to create project", { error, projectName: data.name });
 		throw new Error(`Failed to create project: ${error}`);
 	}
 };
@@ -41,7 +42,7 @@ export const getProjectService = async (id: string) => {
 
 		return project;
 	} catch (error) {
-		console.error("Failed to get project:", error);
+		logger.error("Failed to get project", { error, projectId: id });
 		throw new Error(
 			`Failed to get project: ${
 				error instanceof Error ? error.message : String(error)
@@ -72,7 +73,7 @@ export const updateProjectService = async (
 
 		return project;
 	} catch (error) {
-		console.error("Failed to update project:", error);
+		logger.error("Failed to update project", { error, projectId: id });
 		throw new Error(
 			`Failed to update project: ${
 				error instanceof Error ? error.message : String(error)
@@ -111,7 +112,7 @@ export const getProjectsService = async ({
 
 		return result;
 	} catch (error) {
-		console.error("Failed to get projects:", error);
+		logger.error("Failed to get projects", { error, page, limit });
 		throw new Error(
 			`Failed to get projects: ${
 				error instanceof Error ? error.message : String(error)

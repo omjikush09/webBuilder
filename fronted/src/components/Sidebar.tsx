@@ -6,12 +6,16 @@ import ChatBox from "@/components/ChatBox";
 import { TextStreamChatTransport } from "ai";
 import { processMessageToFiles } from "@/util/responseParser";
 import { ArrowLeft } from "lucide-react";
-import { useCode } from "@/context/CodeContext";
+import { useCode, useAutoScroll } from "@/hooks";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import Link from "next/link";
-import api from "@/util/axios";
 import { useParams } from "next/navigation";
-import { saveMessageToDatabase } from "@/lib/api/message";
+import {
+	getChatEndpoint,
+	saveMessageToDatabase,
+	updateProject,
+} from "@/lib/api";
+import { toast } from "sonner";
 
 export function Sidebar({
 	initialMessages = [],
@@ -20,20 +24,22 @@ export function Sidebar({
 }) {
 	const { id } = useParams<{ id: string }>();
 	const [input, setInput] = useState("");
-	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const isFirstRender = useRef(true);
 	const { code, setCode: setCodeContext } = useCode();
+	const { messagesEndRef, messagesContainerRef, scrollToBottom } =
+		useAutoScroll();
 
 	const { messages, sendMessage, status, error, regenerate } = useChat({
 		messages: initialMessages,
 		transport: new TextStreamChatTransport({
-			api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+			api: getChatEndpoint(),
 		}),
+		id,
 	});
 
 	//Save message to database
 
-	const updateProject = async ({
+	const updateProjectData = async ({
 		html,
 		css,
 		js,
@@ -42,24 +48,35 @@ export function Sidebar({
 		css: string;
 		js: string;
 	}) => {
+		if (!id) return;
+
 		try {
-			const response = await api.patch(`/project/${id}`, {
+			await updateProject(id, {
 				html: html,
 				css: css,
 				js: js,
 			});
 		} catch (error) {
-			console.error(error);
+			toast.error("Falied to save code. Something Went wrong Please try again");
 		}
 	};
 
 	// Process latest assistant message
 	useEffect(() => {
+		if (status === "streaming") {
+			return;
+		}
+		if (status === "error" && error != undefined) {
+			console.log(error);
+			const errorMessage = JSON.parse(error?.message);
+			if (errorMessage?.error) {
+				toast.error(errorMessage?.error);
+			} else {
+				toast.error("Something Went wrong Please try again");
+			}
+			return;
+		}
 		const latestMessage = messages.filter((m) => m.role === "assistant").pop();
-		// console.log(status);
-		// console.log(error);
-		// console.log(messages);
-
 		//To skip initial messages
 		const initialMessagesLength = initialMessages.length;
 		if (messages.length <= initialMessagesLength) return;
@@ -79,7 +96,7 @@ export function Sidebar({
 
 			setCodeContext(newCode);
 			saveMessageToDatabase({ messages: latestMessage, projectId: id });
-			updateProject(newCode);
+			updateProjectData(newCode);
 		}
 		if (status === "submitted" && !error) {
 			const lastUserMessage = messages.filter((m) => m.role === "user").pop();
@@ -104,27 +121,29 @@ export function Sidebar({
 		}
 	};
 
-	// Auto-scroll to bottom when messages change
-	const scrollToBottom = () => {
-		if (messagesEndRef.current) {
-			messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-		}
-	};
-
 	// Scroll to bottom whenever messages change (including during streaming)
 	useEffect(() => {
 		scrollToBottom();
-	}, [messages]);
+	}, [messages, scrollToBottom]);
 
 	return (
 		<div className="w-1/4 min-w-[400px] h-full bg-background border-r shrink-0 flex flex-col relative p-4">
 			{/* Top section for project files and tools */}
-			<div className="text-sm text-muted-foreground">
+			<div className="flex items-center justify-between gap-2 text-muted-foreground pb-2">
 				<Link href="/">
 					<ArrowLeft />
 				</Link>
+				<h1 className="text-2xl font-bold">
+					{initialMessages[0].parts[0]?.type === "text"
+						? initialMessages[0].parts[0].text.slice(0, 20) +
+						  (initialMessages[0].parts[0].text.length > 20 ? "..." : "")
+						: "Builder AI"}
+				</h1>
 			</div>
-			<div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground scrollbar-track-background">
+			<div
+				className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground scrollbar-track-background"
+				ref={messagesContainerRef}
+			>
 				<div className="space-y-4">
 					{/* {JSON.stringify(messages)} */}
 					<div className="flex flex-col w-full">
@@ -133,9 +152,9 @@ export function Sidebar({
 								key={message.id}
 								className={`${
 									message.role === "user"
-										? "bg-muted-foreground rounded-md p-2 self-end mt-1 "
-										: "my-2"
-								} space-y-4 `}
+										? "bg-muted-foreground rounded-md p-2 self-end "
+										: ""
+								} space-y-4 my-2 `}
 							>
 								{message.role === "assistant" ? "Builder AI:- " : null}
 
@@ -164,7 +183,7 @@ export function Sidebar({
 			{/* Bottom section for ChatBox */}
 			<div className="">
 				<ChatBox
-					disableButton={status !== "ready" || error !== undefined}
+					disableButton={status !== "ready"}
 					textAreaValue={input}
 					setTextAreaValue={setInput}
 					submitButtonFunction={submitMessage}

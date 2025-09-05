@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { generateTextController } from "./chat.controller";
-
+import { validateRequest } from "../../middleware/validateRequest";
+import { chatSchema } from "./chat.schema";
 
 const router: Router = Router();
 
-router.post("/", generateTextController);
+router.post("/", validateRequest(chatSchema), generateTextController);
 
 export default router;

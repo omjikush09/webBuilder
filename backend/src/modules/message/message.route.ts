@@ -7,14 +7,14 @@ import {
 	createMessageSchema,
 	getMessagesByProjectIdSchema,
 } from "./message.schema";
-import { validationError } from "../../middleware/validationError";
+import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = Router();
 
-router.post("/", validationError(createMessageSchema), createMessageController);
+router.post("/", validateRequest(createMessageSchema), createMessageController);
 router.get(
 	"/",
-	validationError(getMessagesByProjectIdSchema),
+	validateRequest(getMessagesByProjectIdSchema),
 	getMessagesController
 );
 

@@ -7,7 +7,7 @@ export interface CodeContent {
 	js: string;
 }
 
-interface CodeContextType {
+export interface CodeContextType {
 	code: CodeContent;
 	setCode: (newCode: Partial<CodeContent>) => void;
 	getCode: (type: keyof CodeContent) => string;
@@ -21,7 +21,9 @@ const defaultCode: CodeContent = {
 	js: "",
 };
 
-const CodeContext = createContext<CodeContextType | undefined>(undefined);
+export const CodeContext = createContext<CodeContextType | undefined>(
+	undefined
+);
 
 interface CodeProviderProps {
 	children: ReactNode;
@@ -64,12 +66,4 @@ export const CodeProvider: React.FC<CodeProviderProps> = ({
 	};
 
 	return <CodeContext.Provider value={value}>{children}</CodeContext.Provider>;
-};
-
-export const useCode = (): CodeContextType => {
-	const context = useContext(CodeContext);
-	if (context === undefined) {
-		throw new Error("useCode must be used within a CodeProvider");
-	}
-	return context;
 };
