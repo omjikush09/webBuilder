@@ -1,11 +1,10 @@
 "use client";
 
 import ChatBox from "@/components/ChatBox";
-import api from "@/util/axios";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { saveMessageToDatabase } from "@/lib/api/message";
+import { createProject, getProjects, saveMessageToDatabase } from "@/lib/api";
 
 export default function Home() {
 	const router = useRouter();
@@ -18,19 +17,16 @@ export default function Home() {
 		error: string;
 	}>({ isLoading: false, error: "", data: "" });
 
-	const createProject = async () => {
+	const createNewProject = async () => {
 		setProjectState({ ...projectState, isLoading: true, error: "" });
 		try {
-			const response = await api.post<
-				{ name: string },
-				{ data: { data: { id: string } } }
-			>("/project", {
+			const response = await createProject({
 				name: message,
 				html: "",
 				css: "",
 				js: "",
 			});
-			const id = response.data.data.id;
+			const id = response.data.id;
 			await saveMessageToDatabase({
 				messages: {
 					id: "",
@@ -48,15 +44,12 @@ export default function Home() {
 		}
 	};
 
-	const getProjects = async () => {
-		const response = await api.get<{
-			data: { id: string; name: string }[];
-		}>("/project");
-
-		setProjects(response.data.data);
+	const fetchProjects = async () => {
+		const response = await getProjects();
+		setProjects(response.data);
 	};
 	useEffect(() => {
-		getProjects();
+		fetchProjects();
 	}, []);
 
 	return (
@@ -74,7 +67,7 @@ export default function Home() {
 				{/* Chat input */}
 				<ChatBox
 					disableButton={projectState.isLoading}
-					submitButtonFunction={createProject}
+					submitButtonFunction={createNewProject}
 					textAreaValue={message}
 					setTextAreaValue={setMessage}
 				/>

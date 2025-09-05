@@ -6,12 +6,11 @@ import ChatBox from "@/components/ChatBox";
 import { TextStreamChatTransport } from "ai";
 import { processMessageToFiles } from "@/util/responseParser";
 import { ArrowLeft } from "lucide-react";
-import { useCode } from "@/context/CodeContext";
+import { useCode, useAutoScroll } from "@/hooks";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import Link from "next/link";
-import api from "@/util/axios";
 import { useParams } from "next/navigation";
-import { saveMessageToDatabase } from "@/lib/api/message";
+import { getChatEndpoint, saveMessageToDatabase, updateProject } from "@/lib/api";
 
 export function Sidebar({
 	initialMessages = [],
@@ -20,21 +19,22 @@ export function Sidebar({
 }) {
 	const { id } = useParams<{ id: string }>();
 	const [input, setInput] = useState("");
-	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const isFirstRender = useRef(true);
 	const { code, setCode: setCodeContext } = useCode();
+	const { messagesEndRef, messagesContainerRef, scrollToBottom } =
+		useAutoScroll();
 
 	const { messages, sendMessage, status, error, regenerate } = useChat({
 		messages: initialMessages,
 		transport: new TextStreamChatTransport({
-			api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+			api: getChatEndpoint(),
 		}),
 		id,
 	});
 
 	//Save message to database
 
-	const updateProject = async ({
+	const updateProjectData = async ({
 		html,
 		css,
 		js,
@@ -43,8 +43,10 @@ export function Sidebar({
 		css: string;
 		js: string;
 	}) => {
+		if (!id) return;
+
 		try {
-			const response = await api.patch(`/project/${id}`, {
+			await updateProject(id, {
 				html: html,
 				css: css,
 				js: js,
@@ -80,7 +82,7 @@ export function Sidebar({
 
 			setCodeContext(newCode);
 			saveMessageToDatabase({ messages: latestMessage, projectId: id });
-			updateProject(newCode);
+			updateProjectData(newCode);
 		}
 		if (status === "submitted" && !error) {
 			const lastUserMessage = messages.filter((m) => m.role === "user").pop();
@@ -105,17 +107,10 @@ export function Sidebar({
 		}
 	};
 
-	// Auto-scroll to bottom when messages change
-	const scrollToBottom = () => {
-		if (messagesEndRef.current) {
-			messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-		}
-	};
-
 	// Scroll to bottom whenever messages change (including during streaming)
 	useEffect(() => {
 		scrollToBottom();
-	}, [messages]);
+	}, [messages, scrollToBottom]);
 
 	return (
 		<div className="w-1/4 min-w-[400px] h-full bg-background border-r shrink-0 flex flex-col relative p-4">
@@ -125,7 +120,10 @@ export function Sidebar({
 					<ArrowLeft />
 				</Link>
 			</div>
-			<div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground scrollbar-track-background">
+			<div
+				className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground scrollbar-track-background"
+				ref={messagesContainerRef}
+			>
 				<div className="space-y-4">
 					{/* {JSON.stringify(messages)} */}
 					<div className="flex flex-col w-full">
