@@ -11,15 +11,12 @@ router.get("/api", (req, res) => {
 	res.json({
 		message: "Website Builder API",
 		endpoints: {
-			health: "/health",
-			api: "/api",
 			projects: "/v1/projects",
 			messages: "/v1/messages",
+			chat: "/v1/chat",
 		},
 	});
 });
-
-
 
 // Routes
 router.use("/v1/chat", chatRoute);

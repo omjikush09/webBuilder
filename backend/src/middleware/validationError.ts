@@ -8,7 +8,7 @@ export interface ValidationErrorResponse {
 	fields?: Record<string, string[]>;
 }
 
-export const validationError = (schema: ZodObject<any>) => {
+export const validateRequest = (schema: ZodObject<any>) => {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			// Validate request using the provided schema (body, query, params)

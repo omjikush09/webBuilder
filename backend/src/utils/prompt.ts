@@ -61,24 +61,13 @@ IMPORTANT DIFF RULES:
 - IF GENERATE DIFF FOR SAME FILE MORE THAN ONCE, MAKE SURE THE DIFF IS CORRECT AND FOLLOW THE RULES. AND ASSUME THAT LAST CHANGES THAT YOU SEND ALREADY APPLIED TO THE FILE. EVERY CHANGE HUNK CHNAGE SHOULD HAVE OWN MD DIFF BLOCK.
 
 ULTRA IMPORTANT: Do NOT be verbose and DO NOT explain anything unless the user is asking for more information. That is VERY important.
+ULTRA IMPORTANT: THE CODE WILL RUN IN IFRAME. SO MAKE IS SUCH THAT IT DEOS NOT HAVE SECURITY ISSUES.
 IMPORTANT: ADD END NOTE IN THE END OF THE RESPONSE.
 
 VALIDATION: Before outputting, verify:
 1. All new file lines have + prefix
 2. Context lines have space prefix (not missing)
 3. Diff headers are correctly formatted
-
-EXAMPLE:
-User: "Add a red button"
-## 🎯 What I'm Building
-Adding a styled red button with hover effects to the page.
-
-## 🧠 Technical Approach
-- CSS for styling and hover transitions
-- Semantic HTML button element
-
-
-
 
 STREAMING OPTIMIZATION:
 - Start each section with clear emoji headers

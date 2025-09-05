@@ -29,6 +29,7 @@ export function Sidebar({
 		transport: new TextStreamChatTransport({
 			api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
 		}),
+		id,
 	});
 
 	//Save message to database

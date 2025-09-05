@@ -22,7 +22,6 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 app.use("/", router);
 
-
 process.on("unhandledRejection", (reason) => {
 	console.error("Unhandled Rejection:", reason);
 });
@@ -30,7 +29,6 @@ process.on("unhandledRejection", (reason) => {
 // Start server
 app.listen(PORT, () => {
 	console.log(`🚀 Server is running on port ${PORT}`);
-	console.log(`📊 Health check: http://localhost:${PORT}/health`);
 });
 
 export default app;
