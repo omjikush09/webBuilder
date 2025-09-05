@@ -10,7 +10,6 @@ export const createMessageController = async (
 		const result = await createMessageService(req.body);
 		res.status(201).json(result);
 	} catch (error) {
-		console.error("Error creating message:", error);
 		res.status(500).json({ error: "Failed to create message." });
 	}
 };
@@ -23,7 +22,6 @@ export const getMessagesController = async (
 		const messages = await getMessagesService(req.query);
 		res.status(200).json(messages);
 	} catch (error) {
-		console.error("Error getting messages:", error);
 		res.status(500).json({ error: "Failed to get messages." });
 	}
 };

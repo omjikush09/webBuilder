@@ -71,7 +71,9 @@ export default function Home() {
 					textAreaValue={message}
 					setTextAreaValue={setMessage}
 				/>
-				<h1 className="text-2xl font-bold">Projects</h1>
+				{projects.length > 0 && (
+					<h1 className="text-2xl font-bold">Projects</h1>
+				)}
 				<div className="flex  gap-2 overflow-x-auto w-full flex-wrap">
 					{projects.map((project) => (
 						<div
