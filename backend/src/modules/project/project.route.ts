@@ -5,7 +5,7 @@ import {
 	getProjectsController,
 	updateProjectController,
 } from "./project.controller";
-import { validateRequest } from "../../middleware/validationError";
+import { validateRequest } from "../../middleware/validateRequest";
 import {
 	createProjectSchema,
 	getProjectSchema,

@@ -3,6 +3,7 @@ import { anthropic, AnthropicProviderOptions } from "@ai-sdk/anthropic";
 import { convertToModelMessages, streamText, UIMessage } from "ai";
 import { Response } from "express";
 import { getProjectService } from "../project/project.service";
+import logger from "../../utils/logger";
 
 export const generateTextService = async (
 	chatId: string,
@@ -33,7 +34,11 @@ export const generateTextService = async (
 
 		return textStream.pipeTextStreamToResponse(res);
 	} catch (error) {
-		// console.error(error);
+		logger.error("Failed to generate AI response", {
+			error,
+			chatId,
+			messageCount: messages.length,
+		});
 		throw error;
 	}
 };

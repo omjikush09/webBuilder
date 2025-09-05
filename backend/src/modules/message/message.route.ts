@@ -7,7 +7,7 @@ import {
 	createMessageSchema,
 	getMessagesByProjectIdSchema,
 } from "./message.schema";
-import { validateRequest } from "../../middleware/validationError";
+import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = Router();
 

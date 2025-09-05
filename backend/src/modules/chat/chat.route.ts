@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { generateTextController } from "./chat.controller";
-import { validateRequest } from "../../middleware/validationError";
+import { validateRequest } from "../../middleware/validateRequest";
 import { chatSchema } from "./chat.schema";
 
 const router: Router = Router();
