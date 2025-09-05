@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createProject, getProjects, saveMessageTodb } from "@/lib/api";
+import { Marquee } from "@/components/magicui/marquee";
 
 export default function Home() {
 	const router = useRouter();
@@ -79,17 +80,19 @@ export default function Home() {
 				{projects.length > 0 && (
 					<h1 className="text-2xl font-bold">Projects</h1>
 				)}
-				<div className="flex  gap-2 overflow-x-auto w-full flex-wrap">
-					{projects.map((project) => (
-						<div
-							className="flex items-center justify-center bg-neutral-700 gap-7 rounded-md p-4 cursor-pointer  w-[180px]  text-center truncate"
-							key={project.id}
-							onClick={() => router.push(`/project/${project.id}`)}
-						>
-							{project.name.slice(0, 20)}
-							{project.name.length > 20 && "..."}
-						</div>
-					))}
+				<div className="flex relative  gap-2 overflow-x-auto w-full flex-wrap">
+					<Marquee pauseOnHover>
+						{projects.map((project) => (
+							<div
+								className="flex items-center justify-center bg-neutral-700 gap-7 rounded-md p-4 cursor-pointer  w-[180px]  text-center truncate"
+								key={project.id}
+								onClick={() => router.push(`/project/${project.id}`)}
+							>
+								{project.name.slice(0, 20)}
+								{project.name.length > 20 && "..."}
+							</div>
+						))}
+					</Marquee>
 				</div>
 			</div>
 		</main>
