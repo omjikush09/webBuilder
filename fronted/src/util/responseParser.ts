@@ -111,10 +111,6 @@ export function applyDiffToFile(
 		const removedLines = contentLines.filter((line) =>
 			line.startsWith("-")
 		).length;
-		const contextLines = contentLines.filter(
-			(line) => !line.startsWith("+") && !line.startsWith("-")
-		).length;
-
 		// Create corrected diff header
 		let correctedDiffHeader;
 		if (isFileEmpty) {
@@ -152,17 +148,13 @@ export function applyDiffToFile(
 			console.warn(
 				"applyPatch failed, falling back to direct content extraction"
 			);
-			// Fallback: extract content directly
-			const extractedContent = contentLines
-				.filter((line) => line.startsWith("+"))
-				.map((line) => line.substring(1))
-				.join("\n");
-			return extractedContent;
+			// Fallback: return original content
+			return currentContent;
 		}
 		return newContent;
 	} catch (error) {
 		console.warn("Diff failed:", error);
-		// Show toast error and return original content
+
 		console.error(
 			"Failed to apply diff: " +
 				(error instanceof Error ? error.message : String(error))

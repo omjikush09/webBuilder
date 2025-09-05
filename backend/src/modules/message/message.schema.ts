@@ -6,7 +6,7 @@ export const createMessageSchema = z.object({
 		parts: z.array(
 			z.object({
 				type: z.string(),
-				text: z.string().optional(),
+				text: z.string().min(1, "Text is required").optional(),
 				state: z.string().optional(),
 			})
 		),

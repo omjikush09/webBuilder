@@ -5,6 +5,8 @@ import { Response } from "express";
 import { getProjectService } from "../project/project.service";
 import logger from "../../utils/logger";
 
+const MAX_TOEKN_ALLOWED = 20000;
+
 export const generateTextService = async (
 	chatId: string,
 	messages: UIMessage[],
@@ -29,8 +31,14 @@ export const generateTextService = async (
 					thinking: { type: "enabled", budgetTokens: 12000 },
 				} satisfies AnthropicProviderOptions,
 			},
-			// maxOutputTokens:20000
+			maxRetries: 0,
 		});
+
+		const usage = await textStream.totalUsage;
+		if (usage && usage.totalTokens && usage.totalTokens > MAX_TOEKN_ALLOWED) {
+			res.status(400).json({ error: "Max tokens allowed exceeded" });
+			return;
+		}
 
 		return textStream.pipeTextStreamToResponse(res);
 	} catch (error) {
