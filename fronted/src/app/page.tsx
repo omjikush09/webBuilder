@@ -56,7 +56,9 @@ export default function Home() {
 		<main className="w-screen min-h-screen    px-4  grid place-items-center  bg-zinc-500    text-stone-300">
 			<div className="mx-auto flex  w-full flex-col items-center gap-7 max-md:pt-4 max-w-2xl">
 				{/* Welcome message */}
-
+				{projectState.isLoading && (
+					<div className="text-2xl font-bold">Loading...</div>
+				)}
 				<div
 					className="inline-block max-w-full align-middle max-md:line-clamp-2 max-md:break-words md:overflow-hidden md:overflow-ellipsis select-none text-stone-300 text-4xl"
 					style={{ opacity: 1 }}
