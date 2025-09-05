@@ -82,11 +82,12 @@ export default function Home() {
 				<div className="flex  gap-2 overflow-x-auto w-full flex-wrap">
 					{projects.map((project) => (
 						<div
-							className="flex items-center justify-center bg-neutral-700 gap-7 rounded-md p-4 cursor-pointer    text-center truncate"
+							className="flex items-center justify-center bg-neutral-700 gap-7 rounded-md p-4 cursor-pointer  w-[180px]  text-center truncate"
 							key={project.id}
 							onClick={() => router.push(`/project/${project.id}`)}
 						>
-							{project.name}
+							{project.name.slice(0, 20)}
+							{project.name.length > 20 && "..."}
 						</div>
 					))}
 				</div>
