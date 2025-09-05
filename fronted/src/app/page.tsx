@@ -45,11 +45,15 @@ export default function Home() {
 	};
 
 	const fetchProjects = async () => {
+		setProjectState({ ...projectState, isLoading: true, error: "" });
 		try {
 			const response = await getProjects();
 			setProjects(response.data);
 		} catch (error) {
 			toast.error("Failed to get projects");
+			setProjectState({ ...projectState, error: "Failed to get projects" });
+		} finally {
+			setProjectState({ ...projectState, isLoading: false });
 		}
 	};
 	useEffect(() => {
