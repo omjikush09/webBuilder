@@ -9,6 +9,7 @@ dotenv.config();
 import chatRoute from "./modules/chat/chat.route";
 import projectRoute from "./modules/project/project.route";
 import router from "./routes";
+import logger from "./utils/logger";
 
 const app: Application = express();
 const PORT = process.env.PORT || 8000;
@@ -23,7 +24,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use("/", router);
 
 process.on("unhandledRejection", (reason) => {
-	console.error("Unhandled Rejection:", reason);
+	logger.error("Unhandled Rejection:", reason);
 });
 
 // Start server
