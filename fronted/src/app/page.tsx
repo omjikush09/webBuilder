@@ -61,30 +61,34 @@ export default function Home() {
 	}, []);
 
 	return (
-		<main className="w-screen min-h-screen    px-4  grid place-items-center  bg-zinc-500    text-stone-300">
-			<div className="mx-auto flex  w-full flex-col items-center gap-7 max-md:pt-4 max-w-2xl">
-				{/* Welcome message */}
-				{projectState.isLoading && (
-					<div className="text-2xl font-bold">Loading...</div>
-				)}
-				<div
-					className="inline-block max-w-full align-middle max-md:line-clamp-2 max-md:break-words md:overflow-hidden md:overflow-ellipsis select-none text-stone-300 text-4xl"
-					style={{ opacity: 1 }}
-				>
-					What should we build today?
-				</div>
+		<main className="w-screen h-screen    px-4    bg-zinc-500    text-stone-300">
+			<div className=" flex flex-col h-full w-full gap-7">
+				<div className=" flex h-2/3 w-full items-center flex-col justify-end gap-7 max-md:pt-4">
+					{/* Welcome message */}
+					{projectState.isLoading && (
+						<div className="text-2xl font-bold">Loading...</div>
+					)}
+					<div
+						className="inline-block max-w-full align-middle max-md:line-clamp-2 max-md:break-words md:overflow-hidden md:overflow-ellipsis select-none text-stone-300 text-4xl"
+						style={{ opacity: 1 }}
+					>
+						What should we build today?
+					</div>
 
-				{/* Chat input */}
-				<ChatBox
-					disableButton={projectState.isLoading}
-					submitButtonFunction={createNewProject}
-					textAreaValue={message}
-					setTextAreaValue={setMessage}
-				/>
-				{projects.length > 0 && (
-					<h1 className="text-2xl font-bold">Projects</h1>
-				)}
-				<div className="flex relative  gap-2 overflow-x-auto w-full flex-wrap">
+					{/* Chat input */}
+					<div className="w-full max-w-2xl">
+						<ChatBox
+							disableButton={projectState.isLoading}
+							submitButtonFunction={createNewProject}
+							textAreaValue={message}
+							setTextAreaValue={setMessage}
+						/>
+					</div>
+					{projects.length > 0 && (
+						<h1 className="text-2xl font-bold text-center ">Projects</h1>
+					)}
+				</div>
+				<div className="flex relative   gap-2 overflow-x-auto w-full flex-wrap">
 					<Marquee pauseOnHover>
 						{projects.map((project) => (
 							<div
