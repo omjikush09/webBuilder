@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createProject, getProjects, saveMessageTodb } from "@/lib/api";
 import { Marquee } from "@/components/magicui/marquee";
+import { Loading } from "@/components/Loading";
 
 export default function Home() {
 	const router = useRouter();
@@ -65,13 +66,9 @@ export default function Home() {
 			<div className=" flex flex-col h-full w-full gap-7">
 				<div className=" flex h-2/3 w-full items-center flex-col justify-end gap-7 max-md:pt-4">
 					{/* Welcome message */}
-					{projectState.isLoading && (
-						<div className="text-2xl font-bold">Loading...</div>
-					)}
-					<div
-						className="inline-block max-w-full align-middle max-md:line-clamp-2 max-md:break-words md:overflow-hidden md:overflow-ellipsis select-none text-stone-300 text-4xl"
-						style={{ opacity: 1 }}
-					>
+
+					<div className="inline-block max-w-full overflow-ellipsis select-none text-stone-300 text-4xl">
+						<div>{projectState.isLoading && <Loading />}</div>
 						What should we build today?
 					</div>
 
