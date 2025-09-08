@@ -125,10 +125,9 @@ export function Sidebar({
 				<Link href="/">
 					<ArrowLeft />
 				</Link>
-				<h1 className="text-2xl font-bold">
+				<h1 className="text-2xl font-bold truncate max-w-[300px]">
 					{initialMessages[0].parts[0]?.type === "text"
-						? initialMessages[0].parts[0].text.slice(0, 20) +
-						  (initialMessages[0].parts[0].text.length > 20 ? "..." : "")
+						? initialMessages[0].parts[0].text
 						: "Builder AI"}
 				</h1>
 			</div>

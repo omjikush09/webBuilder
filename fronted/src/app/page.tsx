@@ -89,12 +89,11 @@ export default function Home() {
 					<Marquee pauseOnHover>
 						{projects.map((project) => (
 							<div
-								className="flex items-center justify-center bg-neutral-700 gap-7 rounded-md p-4 cursor-pointer  w-[180px]  text-center truncate"
+								className="flex items-center justify-center bg-neutral-700 gap-7 rounded-md p-4 cursor-pointer    text-center "
 								key={project.id}
 								onClick={() => router.push(`/project/${project.id}`)}
 							>
-								{project.name.slice(0, 20)}
-								{project.name.length > 20 && "..."}
+								<span className="truncate w-[180px]">{project.name}</span>
 							</div>
 						))}
 					</Marquee>
